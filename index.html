@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>mmartan</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+        <div id="content">
+
+            <header class="navbar-form">
+                <div class="form-group">
+                    <h4>mmartan</h4>
+                </div>
+                <div class="form-group navbar-right">
+                    <input ref="categoryField" type="text" class="form-control" placeholder="Search" @keyup.enter="fetchData">
+                </div>
+            </header>
+        
+            <div class="breadcrumb">
+                <h1>{{ label_search }}</h1>
+            </div>
+
+            <div class="products">
+                <div class="box-products">
+                    <div class="products-content" v-if="products.length < limit"  v-for="p in products">
+                        <div class="image" >
+                            <img :src="p.img"/>
+                        </div>
+                        <div class="info">
+                            <label>{{ p.name }}</label>
+                            <br/>
+                            <span>{{ p.description }}</span>
+                        </div>
+                        <div class="price">
+                            <span>R$ {{ p.price }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <select ref="numberProductField" v-on:change="selectNumberProducts">
+                <option value="all">Tudo</option>
+                <option value="5">5 produtos por página</option>
+                <option value="10">10 produtos por página</option>
+                <option value="15">15 produtos por página</option>
+            </select>
+        
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/vue"></script>   
+        <script src="vue.js"></script>  
+</body>
+</html>
+
+ 
