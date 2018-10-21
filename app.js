@@ -1,5 +1,12 @@
-var app = require(__dirname + '/config/server');
+var express = require('express');
+var app = express();
 
-app.listen(3000, function(){
-    console.log('Servidor on');
+app.set('view engine', 'ejs');
+app.use(express.static('public'));
+
+var port = process.env.PORT || 8080;
+app.listen(port);
+
+app.get('/', function(req, res){
+    res.render('index.ejs')
 });

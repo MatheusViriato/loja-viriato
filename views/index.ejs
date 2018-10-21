@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>mmartan</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <style>
+            .products-content {
+                display: flex;
+                grid-template-areas: 
+                'image info price';
+                padding-left: 10px;
+                padding-right: 100px;
+                border-right:1px solid rgb(236, 225, 225);    
+                border-left:1px solid rgb(236, 225, 225);    
+                border-top:1px solid rgb(236, 225, 225);    
+            }
+
+            .notice-products{
+                border-bottom:3px solid rgb(233, 205, 113);
+                padding-bottom: 8px;
+            }
+
+            .box-products{
+                margin-top: 30px;
+            }
+
+            .image {
+                grid-area: image;
+                padding: 5px;
+            }
+
+            .image img{
+                width: 80px;
+                height: 80px;
+            }
+
+            .info {
+                grid-area: info;
+                text-align: left;
+                margin-top: 30px;
+                width: 33.33%;
+            }
+
+            .info label {
+                font-size: 16px;
+            }
+
+            .info span {
+                font-size: 13px;
+                color: rgb(147, 151, 153);
+            }
+
+            .price {
+                grid-area: price;
+                text-align: center;
+                margin-top: 30px;
+                width: 33.33%;
+            }
+
+            .price span{
+                float: right;
+            }
+
+            .new-price{
+                font-weight: bold;
+            }
+
+            .old-price{
+                font-weight: normal;
+            }
+
+            .products{
+                padding-left: 130px;
+                padding-right: 130px;
+                margin-bottom: 10px;
+            }
+
+            .form-control{
+                width: auto!important;
+                display: inline!important;
+            }
+
+            .pagination{
+                grid-template-areas: 
+                'select-numbers btn-previous btn-next';
+                width: 100%;
+            }
+
+            .select-numbers{
+                grid-area: select-numbers;
+            }
+
+            .btn-previous{
+                grid-area: btn-previous;
+                float: right;
+            }
+
+            .btn-next{
+                grid-area: btn-next;
+                float: right;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="content">
+            <header class="navbar-form">
+                <div class="form-group">
+                    <h4>mmartan</h4>
+                </div>
+                <div class="form-group navbar-right">
+                    <input ref="categoryField" type="text" class="form-control" placeholder="Pesquisar" @keyup.enter="fetchData">
+                </div>
+            </header>
+            <div class="breadcrumb">
+                <h1>{{ label_search }}</h1>
+            </div>
+            <div class="products">
+                <span class="notice-products">{{ count }}</span>
+                <div class="box-products">
+                    <div class="products-content" v-for="p in products">
+                        <div class="image" >
+                            <img :src="p.img"/>
+                        </div>
+                        <div class="image" >
+                            <img :src="p.img1"/>
+                        </div>
+                        <div class="image" >
+                            <img :src="p.img2"/>
+                        </div>
+                        <div class="image" >
+                            <img :src="p.img3"/>
+                        </div>
+                        <div class="info">
+                            <label>{{ p.name }}</label>
+                            <br/>
+                            <span>{{ p.description }}</span>
+                        </div>
+                        <div class="price">
+                            <span class="new-price">R$ {{ p.price }}</span>
+                            <span class="old-price"><strike>R$ {{ p.old_price }}</strike>&nbsp;por&nbsp;</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="pagination">
+                    <select class="form-control select-numbers" ref="numberProductField" v-on:change="selectNumberProducts">
+                        <option value="5">5 produtos por página</option>
+                        <option value="10">10 produtos por página</option>
+                        <option value="15">15 produtos por página</option>
+                    </select>
+                    <button class="form-control btn-next" ref="nextPage" v-on:click="changePage(1)">></button>
+                    <button class="form-control btn-previous" ref="previousPage" v-on:click="changePage(-1)" disabled><</button> 
+                </div>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/vue"></script> 
+        <script>
+            var apiURL = 'https://loja-viriato.herokuapp.com/api'
+
+            var app = new Vue({
+            el: '#content',
+            data: {
+                label_search: "Todos os produtos",
+                products: null,
+                all_products: null,
+                category: null,
+                limit: null,
+                count: null,
+                page: 1
+            },
+            created: function () {
+                var xhr = new XMLHttpRequest()
+                var self = this
+                xhr.open('GET', apiURL)
+                xhr.onload = function () {
+                self.all_products = JSON.parse(xhr.responseText)
+                self.products = self.selectNumberProducts()
+                self.count = self.all_products.length + " PRODUTOS ENCONTRADOS"
+                }
+                xhr.send()
+            },
+            methods: {
+                fetchData: function () {
+                var xhr = new XMLHttpRequest()
+                var self = this
+                self.page = 1
+                this.$refs.previousPage.disabled = true
+                this.$refs.nextPage.disabled = false
+                self.category = this.$refs.categoryField.value
+                if(self.category != '') {
+                    xhr.open('GET', apiURL + '/category/?category=' + self.category)
+                } else {
+                xhr.open('GET', apiURL)
+                    self.category = "Todos os produtos"
+                }
+                xhr.onload = function () {
+                    self.all_products = JSON.parse(xhr.responseText)
+                    self.products = self.selectNumberProducts()
+                    if(self.products.length === 0) self.label_search = "Categoria não encontrada"
+                    else self.label_search = self.category
+                    self.count = self.all_products.length + " PRODUTOS ENCONTRADOS"
+                }
+                xhr.send()
+                },
+                selectNumberProducts: function (){
+                var self = this
+                self.limit = this.$refs.numberProductField.value
+                self.products = Object.entries(self.all_products).slice(0,self.limit).map(entry => entry[1])
+                return self.products   
+                },
+                changePage: function(new_page){
+                var self = this
+                self.page += new_page
+                var perPage = self.limit
+                var from = (self.page * perPage) - perPage
+                var to = (self.page * perPage)
+                this.controlNavigation(self, to)
+                self.products = Object.entries(self.all_products).slice(from,to).map(entry => entry[1])
+                return self.products 
+                },
+                controlNavigation: function(self, to){
+                if(self.page === 1){
+                    this.$refs.previousPage.disabled = true
+                    this.$refs.nextPage.disabled = false
+                }
+                if(self.page > 1){
+                    this.$refs.previousPage.disabled = false
+                }
+                if(Object.entries(self.all_products).slice(to).map(entry => entry[1]).length === 0){
+                    this.$refs.nextPage.disabled = true
+                }
+                }
+            }
+            })
+        </script>  
+    </body>
+</html>
